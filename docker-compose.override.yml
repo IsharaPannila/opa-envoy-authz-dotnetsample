@@ -1,0 +1,32 @@
+version: '3.4'
+
+services:
+  envoy:
+   volumes:
+     - ./Envoy/config/envoy.yaml:/etc/envoy/envoy.yaml
+   ports:
+   - "5200:8000"
+   - "15200:8001"
+
+  opa:
+   volumes:
+     - ./opa-policy/policy.rego:/etc/policy.rego
+   command:
+     - run
+     - --server
+     - --log-level=debug
+     - --log-format=json-pretty
+     - --set=plugins.envoy_ext_authz_grpc.addr=:9191
+     - --set=decision_logs.console=true
+     - --set=plugins.envoy_ext_authz_grpc.path=envoy/authz/allow
+     - /etc/policy.rego
+
+  dotnet6-api-sample:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro

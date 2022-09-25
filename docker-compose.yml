@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  envoy:
+   image: envoyproxy/envoy:v1.23-latest
+
+  opa:
+   image: openpolicyagent/opa:latest-envoy
+
+  dotnet6-api-sample:
+    image: ${DOCKER_REGISTRY-}dotnet6apisample
+    build:
+      context: .
+      dockerfile: dotnet6-api-sample/Dockerfile
+
